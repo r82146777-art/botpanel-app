@@ -9,9 +9,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
 
@@ -21,24 +23,30 @@ jobs:
       - name: Build web
         run: npm run build
 
-      - uses: actions/setup-java@v4
+      - name: Setup Java
+        uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
 
       - name: Setup Android SDK
-        uses: maxim-lobanov/setup-android-sdk@v1
+        uses: android-actions/setup-android@v4
+        with:
+          packages: 'platform-tools platforms;android-34 build-tools;34.0.0'
 
-      - name: Cap sync
+      - name: Accept licenses
+        run: yes | sdkmanager --licenses >/dev/null 2>&1 || true
+
+      - name: Cap add + sync
         run: |
           npx cap add android || true
           npx cap sync android
 
-      - name: Build APK
+      - name: Build Debug APK
         working-directory: android
         run: |
           chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon
+          ./gradlew assembleDebug --no-daemon --stacktrace
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
@@ -46,3 +54,6 @@ jobs:
           name: botpanel-debug-apk
           path: android/app/build/outputs/apk/debug/*.apk
           retention-days: 30
+
+      - name: List APK
+        run: find android/app/build/outputs -name "*.apk" -ls || true

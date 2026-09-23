@@ -8,24 +8,23 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci || npm install
+        run: npm install
 
-      - name: Build web assets
+      - name: Build web
         run: npm run build
 
-      - name: Setup Java 21
+      - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
@@ -34,25 +33,26 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Add Capacitor Android platform
-        run: npx cap add android
+      - name: Add Android platform (if needed) and sync
+        run: |
+          if [ ! -d android ]; then
+            npx cap add android
+          fi
+          npx cap sync android
 
-      - name: Sync Capacitor
-        run: npx cap sync android
-
-      - name: Make gradlew executable
+      - name: Grant execute to gradlew
         run: chmod +x android/gradlew
 
       - name: Build Debug APK
         working-directory: android
         run: ./gradlew assembleDebug --no-daemon --stacktrace
 
-      - name: List APK
-        run: find android -name "*.apk" -type f
-
-      - name: Upload APK Artifact
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: BotPanel-APK
+          name: botpanel-debug-apk
           path: android/app/build/outputs/apk/debug/*.apk
-          retention-days: 90
+          retention-days: 30
+
+      - name: Show APK info
+        run: find android/app/build/outputs -name "*.apk" -exec ls -lh {} \;

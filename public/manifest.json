@@ -1,0 +1,20 @@
+{
+  "name": "BotPanel",
+  "short_name": "BotPanel",
+  "description": "پنل مدیریت ربات‌های تلگرام روبیکا سروش بله",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#4f46e5",
+  "orientation": "portrait",
+  "lang": "fa",
+  "dir": "rtl",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
